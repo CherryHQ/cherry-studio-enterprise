@@ -118,6 +118,7 @@
       "get_key": "获取",
       "get_key_success": "自动获取密钥成功",
       "login": "登录",
+      "logout": "退出登录",
       "oauth_button": "使用{{provider}}登录"
     },
     "backup": {
@@ -971,6 +972,7 @@
       "title": "你是一名擅长会话的助理，你需要将用户的会话总结为 10 个字以内的标题，标题语言与用户的首要语言一致，不要使用标点符号和其他特殊符号"
     },
     "provider": {
+      "cherry-enterprise": "Cherry 企业版",
       "aihubmix": "AiHubMix",
       "burncloud": "BurnCloud",
       "alayanew": "Alaya NeW",

@@ -402,7 +402,7 @@ export default class GeminiProvider extends BaseProvider {
     const messageContents: Content = await this.getMessageContents(userLastMessage!)
 
     const chat = this.sdk.chats.create({
-      model: model.id,
+      model: this.getModelId(model),
       config: generateContentConfig,
       history: history
     })
@@ -444,7 +444,7 @@ export default class GeminiProvider extends BaseProvider {
     const processToolResults = async (toolResults: Awaited<ReturnType<typeof parseAndCallTools>>, idx: number) => {
       if (toolResults.length === 0) return
       const newChat = this.sdk.chats.create({
-        model: model.id,
+        model: this.getModelId(model),
         config: generateContentConfig,
         history: history as Content[]
       })
@@ -714,7 +714,7 @@ export default class GeminiProvider extends BaseProvider {
         : content
     if (!onResponse) {
       const response = await this.sdk.models.generateContent({
-        model: model.id,
+        model: this.getModelId(model),
         config: {
           maxOutputTokens: maxTokens,
           temperature: assistant?.settings?.temperature,
@@ -731,7 +731,7 @@ export default class GeminiProvider extends BaseProvider {
     }
 
     const response = await this.sdk.models.generateContentStream({
-      model: model.id,
+      model: this.getModelId(model),
       config: {
         maxOutputTokens: maxTokens,
         temperature: assistant?.settings?.temperature,
@@ -791,7 +791,7 @@ export default class GeminiProvider extends BaseProvider {
       : userMessage.content
 
     const response = await this.sdk.models.generateContent({
-      model: model.id,
+      model: this.getModelId(model),
       config: {
         systemInstruction: isGemmaModel(model) ? undefined : systemMessage.content
       },
@@ -818,7 +818,7 @@ export default class GeminiProvider extends BaseProvider {
       ? `<start_of_turn>user\n${prompt}<end_of_turn>\n<start_of_turn>user\n${content}<end_of_turn>`
       : content
     const response = await this.sdk.models.generateContent({
-      model: model.id,
+      model: this.getModelId(model),
       config: {
         systemInstruction: isGemmaModel(model) ? undefined : prompt
       },
@@ -868,7 +868,7 @@ export default class GeminiProvider extends BaseProvider {
 
     const response = await this.sdk.models
       .generateContent({
-        model: model.id,
+        model: this.getModelId(model),
         config: {
           systemInstruction: isGemmaModel(model) ? undefined : systemMessage.content,
           temperature: assistant?.settings?.temperature,
@@ -986,7 +986,7 @@ export default class GeminiProvider extends BaseProvider {
     try {
       if (!stream) {
         const result = await this.sdk.models.generateContent({
-          model: model.id,
+          model: this.getModelId(model),
           contents: [{ role: 'user', parts: [{ text: 'hi' }] }],
           config: config
         })
@@ -995,7 +995,7 @@ export default class GeminiProvider extends BaseProvider {
         }
       } else {
         const response = await this.sdk.models.generateContentStream({
-          model: model.id,
+          model: this.getModelId(model),
           contents: [{ role: 'user', parts: [{ text: 'hi' }] }],
           config: config
         })
@@ -1052,7 +1052,7 @@ export default class GeminiProvider extends BaseProvider {
    */
   public async getEmbeddingDimensions(model: Model): Promise<number> {
     const data = await this.sdk.models.embedContent({
-      model: model.id,
+      model: this.getModelId(model),
       contents: [{ role: 'user', parts: [{ text: 'hi' }] }]
     })
     return data.embeddings?.[0]?.values?.length || 0
@@ -1089,7 +1089,7 @@ export default class GeminiProvider extends BaseProvider {
       const start_time_millsec = new Date().getTime()
       onChunk({ type: ChunkType.LLM_RESPONSE_CREATED })
       const chat = this.sdk.chats.create({
-        model: model.id,
+        model: this.getModelId(model),
         config: generateContentConfig,
         history: history
       })

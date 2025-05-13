@@ -118,6 +118,7 @@
       "get_key": "取得",
       "get_key_success": "自動取得金鑰成功",
       "login": "登入",
+      "logout": "登出",
       "oauth_button": "使用{{provider}}登入"
     },
     "backup": {
@@ -971,6 +972,7 @@
       "title": "你是一名擅長會話的助理，你需要將使用者的會話總結為 10 個字以內的標題，標題語言與使用者的首要語言一致，不要使用標點符號和其他特殊符號"
     },
     "provider": {
+      "cherry-enterprise": "Cherry 企業版",
       "aihubmix": "AiHubMix",
       "burncloud": "BurnCloud",
       "alayanew": "Alaya NeW",

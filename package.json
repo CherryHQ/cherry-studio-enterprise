@@ -107,6 +107,7 @@
     "@agentic/tavily": "^7.3.3",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@anthropic-ai/sdk": "^0.41.0",
+    "@cherrystudio/api-sdk": "^0.0.14",
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/preload": "^3.0.0",

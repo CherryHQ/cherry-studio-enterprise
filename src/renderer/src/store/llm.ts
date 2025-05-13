@@ -27,6 +27,16 @@ export interface LlmState {
 
 export const INITIAL_PROVIDERS: Provider[] = [
   {
+    id: 'cherry-enterprise',
+    name: 'Cherry Enterprise',
+    type: 'openai',
+    apiKey: '',
+    apiHost: 'https://api.cherry-ai.com',
+    models: [],
+    isSystem: true,
+    enabled: true
+  },
+  {
     id: 'silicon',
     name: 'Silicon',
     type: 'openai',
@@ -34,7 +44,7 @@ export const INITIAL_PROVIDERS: Provider[] = [
     apiHost: 'https://api.siliconflow.cn',
     models: SYSTEM_MODELS.silicon,
     isSystem: true,
-    enabled: true
+    enabled: false
   },
   {
     id: 'aihubmix',

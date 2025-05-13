@@ -1,13 +1,11 @@
 import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import ModelSettings from '@renderer/pages/settings/ModelSettings/ModelSettings'
 import {
-  Cloud,
   Command,
   Globe,
   HardDrive,
   Info,
   MonitorCog,
-  Package,
   Rocket,
   Settings2,
   SquareTerminal,
@@ -47,18 +45,24 @@ const SettingsPage: FC = () => {
       </Navbar>
       <ContentContainer id="content-container">
         <SettingMenus>
-          <MenuItemLink to="/settings/provider">
+          <MenuItemLink to="/settings/general">
+            <MenuItem className={isRoute('/settings/general')}>
+              <Settings2 size={18} />
+              {t('settings.general')}
+            </MenuItem>
+          </MenuItemLink>
+          {/* <MenuItemLink to="/settings/provider">
             <MenuItem className={isRoute('/settings/provider')}>
               <Cloud size={18} />
               {t('settings.provider.title')}
             </MenuItem>
-          </MenuItemLink>
-          <MenuItemLink to="/settings/model">
+          </MenuItemLink> */}
+          {/* <MenuItemLink to="/settings/model">
             <MenuItem className={isRoute('/settings/model')}>
               <Package size={18} />
               {t('settings.model')}
             </MenuItem>
-          </MenuItemLink>
+          </MenuItemLink> */}
           <MenuItemLink to="/settings/web-search">
             <MenuItem className={isRoute('/settings/web-search')}>
               <Globe size={18} />
@@ -69,12 +73,6 @@ const SettingsPage: FC = () => {
             <MenuItem className={isRoute('/settings/mcp')}>
               <SquareTerminal size={18} />
               {t('settings.mcp.title')}
-            </MenuItem>
-          </MenuItemLink>
-          <MenuItemLink to="/settings/general">
-            <MenuItem className={isRoute('/settings/general')}>
-              <Settings2 size={18} />
-              {t('settings.general')}
             </MenuItem>
           </MenuItemLink>
           <MenuItemLink to="/settings/display">

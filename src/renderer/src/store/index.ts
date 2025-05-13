@@ -6,6 +6,7 @@ import storage from 'redux-persist/lib/storage'
 import storeSyncService from '../services/StoreSyncService'
 import agents from './agents'
 import assistants from './assistants'
+import auth from './auth'
 import backup from './backup'
 import copilot from './copilot'
 import inputToolsReducer from './inputTools'
@@ -25,6 +26,7 @@ import shortcuts from './shortcuts'
 import websearch from './websearch'
 
 const rootReducer = combineReducers({
+  auth,
   assistants,
   agents,
   backup,

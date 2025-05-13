@@ -100,6 +100,14 @@ export default abstract class BaseProvider {
     }
   }
 
+  public getModelId(model: Model) {
+    if (model.owned_by) {
+      return model.id + '@' + model.owned_by
+    }
+
+    return model.id
+  }
+
   public get keepAliveTime() {
     return this.provider.id === 'lmstudio' ? getLMStudioKeepAliveTime() : undefined
   }

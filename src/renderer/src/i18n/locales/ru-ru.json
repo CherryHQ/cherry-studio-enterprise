@@ -118,6 +118,7 @@
       "get_key": "Получить",
       "get_key_success": "Автоматический получение ключа API успешно",
       "login": "Войти",
+      "logout": "Выйти",
       "oauth_button": "Авторизоваться с {{provider}}"
     },
     "backup": {
@@ -971,6 +972,7 @@
       "title": "Вы - эксперт в общении, который суммирует разговоры пользователя в 10-символьном заголовке, совпадающем с языком пользователя, без использования знаков препинания и других специальных символов"
     },
     "provider": {
+      "cherry-enterprise": "Cherry Enterprise",
       "aihubmix": "AiHubMix",
       "burncloud": "BurnCloud",
       "alayanew": "Alaya NeW",

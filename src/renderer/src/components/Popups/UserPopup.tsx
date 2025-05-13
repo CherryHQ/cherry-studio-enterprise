@@ -3,11 +3,14 @@ import EmojiAvatar from '@renderer/components/Avatar/EmojiAvatar'
 import useAvatar from '@renderer/hooks/useAvatar'
 import { useSettings } from '@renderer/hooks/useSettings'
 import ImageStorage from '@renderer/services/ImageStorage'
+import NavigationService from '@renderer/services/NavigationService'
 import { useAppDispatch } from '@renderer/store'
+import { setUser } from '@renderer/store/auth'
 import { setAvatar } from '@renderer/store/runtime'
 import { setUserName } from '@renderer/store/settings'
 import { compressImage, isEmoji } from '@renderer/utils'
-import { Avatar, Dropdown, Input, Modal, Popover, Upload } from 'antd'
+import { Avatar, Button, Dropdown, Input, Modal, Popover, Upload } from 'antd'
+import { LogOut } from 'lucide-react'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -120,6 +123,12 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
     }
   ]
 
+  const onLogout = () => {
+    onClose()
+    dispatch(setUser(undefined))
+    NavigationService.navigate?.('/')
+  }
+
   return (
     <Modal
       width="300px"
@@ -175,6 +184,11 @@ const PopupContainer: React.FC<Props> = ({ resolve }) => {
           maxLength={30}
         />
       </HStack>
+      <Center>
+        <Button type="primary" onClick={onLogout} icon={<LogOut size={12} />} danger>
+          {t('auth.logout')}
+        </Button>
+      </Center>
     </Modal>
   )
 }

@@ -48,8 +48,10 @@ import ZeroOneProviderLogo from '@renderer/assets/images/providers/zero-one.png'
 import ZhipuProviderLogo from '@renderer/assets/images/providers/zhipu.png'
 
 import { TOKENFLUX_HOST } from './constant'
+import { AppLogo } from './env'
 
 const PROVIDER_LOGO_MAP = {
+  'cherry-enterprise': AppLogo,
   '302ai': Ai302ProviderLogo,
   openai: OpenAiProviderLogo,
   silicon: SiliconFlowProviderLogo,
@@ -110,6 +112,17 @@ export const NOT_SUPPORTED_REANK_PROVIDERS = ['ollama']
 export const ONLY_SUPPORTED_DIMENSION_PROVIDERS = ['ollama', 'infini']
 
 export const PROVIDER_CONFIG = {
+  'cherry-enterprise': {
+    api: {
+      url: 'https://api.cherry-ai.com'
+    },
+    websites: {
+      official: 'https://emb.cherry-ai.com/',
+      apiKey: 'https://emb.cherry-ai.com/',
+      docs: 'https://docs.cherry-ai.com/',
+      models: 'https://emb.cherry-ai.com/models'
+    }
+  },
   '302ai': {
     api: {
       url: 'https://api.302.ai'

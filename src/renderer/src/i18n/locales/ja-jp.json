@@ -118,6 +118,7 @@
       "get_key": "取得",
       "get_key_success": "APIキーの自動取得に成功しました",
       "login": "認証",
+      "logout": "ログアウト",
       "oauth_button": "{{provider}}で認証"
     },
     "backup": {
@@ -971,6 +972,7 @@
       "title": "あなたは会話を得意とするアシスタントです。ユーザーの会話を10文字以内のタイトルに要約し、ユーザーの主言語と一致していることを確認してください。句読点や特殊記号は使用しないでください。"
     },
     "provider": {
+      "cherry-enterprise": "Cherry Enterprise",
       "aihubmix": "AiHubMix",
       "burncloud": "BurnCloud",
       "alayanew": "Alaya NeW",
