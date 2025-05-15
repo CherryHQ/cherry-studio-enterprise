@@ -1,5 +1,5 @@
-appId: com.kangfenmao.CherryStudio
-productName: Cherry Studio
+appId: com.cherry-ai.cherry-stuido-enterprise
+productName: 千彗AI
 electronLanguages:
   - zh-CN
   - zh-TW
@@ -53,7 +53,7 @@ asarUnpack:
   - resources/**
   - '**/*.{metal,exp,lib}'
 win:
-  executableName: Cherry Studio
+  executableName: Cherry Studio Enterprise
   artifactName: ${productName}-${version}-${arch}-setup.${ext}
   target:
     - target: nsis
@@ -98,8 +98,9 @@ linux:
   mimeTypes:
     - x-scheme-handler/cherrystudio
 publish:
-  provider: generic
-  url: https://releases.cherry-ai.com
+  provider: github
+  owner: CherryHQ
+  repo: cherry-studio-enterprise
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
 afterPack: scripts/after-pack.js

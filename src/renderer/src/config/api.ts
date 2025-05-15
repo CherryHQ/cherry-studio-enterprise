@@ -4,7 +4,7 @@ import axios from 'axios'
 const config = new Configuration({
   // basePath: import.meta.env.VITE_API_BASE_URL,
   // basePath: 'https://api.cherry-ai.com',
-  basePath: 'https://api.xpoweron.cn',
+  basePath: 'https://api.abilixschool.com',
   accessToken: localStorage.getItem('auth_token') || ''
 })
 
