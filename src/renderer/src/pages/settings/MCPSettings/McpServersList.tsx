@@ -3,6 +3,7 @@ import { nanoid } from '@reduxjs/toolkit'
 import DragableList from '@renderer/components/DragableList'
 import Scrollbar from '@renderer/components/Scrollbar'
 import { useMCPServers } from '@renderer/hooks/useMCPServers'
+import { syncMcpServers } from '@renderer/pages/auth/sync'
 import { MCPServer } from '@renderer/types'
 import { formatMcpError } from '@renderer/utils/error'
 import { Button, Dropdown, Empty, Switch, Tag } from 'antd'
@@ -15,7 +16,6 @@ import styled from 'styled-components'
 import { SettingTitle } from '..'
 import AddMcpServerModal from './AddMcpServerModal'
 import EditMcpJsonPopup from './EditMcpJsonPopup'
-import SyncServersPopup from './SyncServersPopup'
 
 const McpServersList: FC = () => {
   const { mcpServers, addMCPServer, updateMcpServers, updateMCPServer } = useMCPServers()
@@ -41,8 +41,9 @@ const McpServersList: FC = () => {
   }, [addMCPServer, navigate, t])
 
   const onSyncServers = useCallback(() => {
-    SyncServersPopup.show(mcpServers)
-  }, [mcpServers])
+    // SyncServersPopup.show(mcpServers)
+    syncMcpServers()
+  }, [])
 
   const handleAddServerSuccess = useCallback(
     async (server: MCPServer) => {

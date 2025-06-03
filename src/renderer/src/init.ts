@@ -1,5 +1,6 @@
 import KeyvStorage from '@kangfenmao/keyv-storage'
 
+import { syncConfig } from './pages/auth/sync'
 import { startAutoSync } from './services/BackupService'
 import { startNutstoreAutoSync } from './services/NutstoreService'
 import storeSyncService from './services/StoreSyncService'
@@ -27,6 +28,11 @@ function initStoreSync() {
   storeSyncService.subscribe()
 }
 
+function initSyncConfig() {
+  setInterval(syncConfig, 10 * 1000)
+}
+
 initKeyv()
 initAutoSync()
 initStoreSync()
+initSyncConfig()

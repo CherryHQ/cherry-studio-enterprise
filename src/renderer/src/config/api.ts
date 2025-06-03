@@ -3,8 +3,8 @@ import axios from 'axios'
 
 const config = new Configuration({
   // basePath: import.meta.env.VITE_API_BASE_URL,
-  // basePath: 'https://api.cherry-ai.com',
-  basePath: 'https://api.abilixschool.com',
+  // basePath: 'https://api.abilixschool.com',
+  basePath: '',
   accessToken: localStorage.getItem('auth_token') || ''
 })
 
@@ -28,6 +28,10 @@ const api = new DefaultApi(config, undefined, axiosInstance as any)
 
 export const updateApiToken = (token: string) => {
   config.accessToken = token
+}
+
+export const updateApiBasePath = (basePath: string) => {
+  config.basePath = basePath
 }
 
 export default api

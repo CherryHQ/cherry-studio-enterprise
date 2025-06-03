@@ -509,6 +509,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cherrystudio/api-sdk@npm:^0.0.20":
+  version: 0.0.20
+  resolution: "@cherrystudio/api-sdk@npm:0.0.20"
+  dependencies:
+    axios: "npm:^1.6.1"
+  checksum: 10c0/dc8f94892b47e9a60a795076cc5c83c530fbde998d9b999705f0f5834d8829106e11d3932a7bcb7e1561599322f7ad1a6194aad0b92e71cdd584573646ef8dc9
+  languageName: node
+  linkType: hard
+
 "@cherrystudio/embedjs-interfaces@npm:0.1.30":
   version: 0.1.30
   resolution: "@cherrystudio/embedjs-interfaces@npm:0.1.30"
@@ -5574,6 +5583,7 @@ __metadata:
     "@agentic/tavily": "npm:^7.3.3"
     "@ant-design/v5-patch-for-react-19": "npm:^1.0.3"
     "@anthropic-ai/sdk": "npm:^0.41.0"
+    "@cherrystudio/api-sdk": "npm:^0.0.20"
     "@cherrystudio/embedjs": "npm:^0.1.31"
     "@cherrystudio/embedjs-libsql": "npm:^0.1.31"
     "@cherrystudio/embedjs-loader-csv": "npm:^0.1.31"
@@ -6225,6 +6235,17 @@ __metadata:
   version: 1.7.0
   resolution: "atomically@npm:1.7.0"
   checksum: 10c0/31f5efd5d69474681268557af4024f9e10223bb6b39fdedb5f2e19405186c4b76284fac9f6c43c9af75013cad6437e93b7168268f5ddb7aaf1cfc5fdb415f227
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.6.1":
+  version: 1.9.0
+  resolution: "axios@npm:1.9.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.0"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/9371a56886c2e43e4ff5647b5c2c3c046ed0a3d13482ef1d0135b994a628c41fbad459796f101c655e62f0c161d03883454474d2e435b2e021b1924d9f24994c
   languageName: node
   linkType: hard
 
