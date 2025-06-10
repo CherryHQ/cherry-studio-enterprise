@@ -20,7 +20,7 @@ import { LayoutGrid, MessageSquareDiff, PanelLeftClose, PanelRightClose, Search 
 import { FC, useCallback, useState } from 'react'
 import styled from 'styled-components'
 
-import SelectModelButton from './components/SelectModelButton'
+import SelectModelOrFlowButton from './components/SelectModelOrFlowButton'
 import UpdateAppButton from './components/UpdateAppButton'
 
 interface Props {
@@ -131,7 +131,8 @@ const HeaderNavbar: FC<Props> = ({ activeAssistant, setActiveAssistant, activeTo
               </NavbarIcon>
             </Tooltip>
           )}
-          <SelectModelButton assistant={assistant} />
+          {/* <SelectModelButton assistant={assistant} /> */}
+          <SelectModelOrFlowButton assistant={assistant} />
         </HStack>
         <HStack alignItems="center" gap={8}>
           <UpdateAppButton />

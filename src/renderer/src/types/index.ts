@@ -3,9 +3,12 @@ import type { GenerateImagesConfig, GroundingMetadata } from '@google/genai'
 import type OpenAI from 'openai'
 import type { CSSProperties } from 'react'
 
+import { Chatflow, Workflow } from './flow'
 import type { Message } from './newMessage'
 
 export type Assistant = {
+  // 为后续智能体规划添加模式
+  mode: 'system' | 'external'
   id: string
   name: string
   prompt: string
@@ -26,6 +29,18 @@ export type Assistant = {
   knowledgeRecognition?: 'off' | 'on'
   regularPhrases?: QuickPhrase[] // Added for regular phrase
   tags?: string[] // 助手标签
+  workflow?: Workflow
+  chatflow?: Chatflow
+}
+
+export type ModelOrChatflowItem = Model | Chatflow
+
+export function isFlow(item: ModelOrChatflowItem): item is Chatflow {
+  return 'type' in item && item.type === 'chatflow'
+}
+
+export function isModel(item: ModelOrChatflowItem): item is Model {
+  return !isFlow(item)
 }
 
 export type AssistantsSortType = 'tags' | 'list'

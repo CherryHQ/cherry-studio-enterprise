@@ -337,7 +337,8 @@
       "input.thinking.mode.custom": "自定義",
       "input.thinking.mode.custom.tip": "模型最多可以思考的 token 數。需要考慮模型的上下文限制，否則會報錯",
       "input.thinking.mode.tokens.tip": "設置思考的 token 數",
-      "input.thinking.budget_exceeds_max": "思考預算超過最大 token 數"
+      "input.thinking.budget_exceeds_max": "思考預算超過最大 token 數",
+      "input.workflow": "工作流程"
     },
     "code_block": {
       "collapse": "折疊",
@@ -423,7 +424,10 @@
         "pinyin.asc": "按拼音升序",
         "pinyin.desc": "按拼音降序"
       },
-      "no_results": "沒有結果"
+      "no_results": "沒有結果",
+      "submit": "提交",
+      "form.validation.required": "{{field}} 是必填的",
+      "goto.settings": "前往設定..."
     },
     "docs": {
       "title": "說明文件"
@@ -1022,7 +1026,8 @@
       "voyageai": "Voyage AI",
       "qiniu": "七牛雲 AI 推理",
       "tokenflux": "TokenFlux",
-      "302ai": "302.AI"
+      "302ai": "302.AI",
+      "dify": "Dify"
     },
     "restore": {
       "confirm": "確定要復原資料嗎？",
@@ -1823,6 +1828,30 @@
         "assistant": "助手訊息",
         "backup": "備份訊息",
         "knowledge_embed": "知識庫訊息"
+      },
+      "workflow": {
+        "title": "工作流程服務",
+        "search": "搜尋工作流程平台...",
+        "addWorkflow": "新增工作流程",
+        "newWorkflow": "新工作流程",
+        "addSuccess": "工作流程新增成功",
+        "noDescription": "無描述",
+        "name": "名稱",
+        "description": "描述",
+        "url": "API 網址",
+        "apiKey": "API 金鑰",
+        "apiHost": "API主機",
+        "saveSuccess": "工作流程已成功儲存",
+        "saveError": "工作流程儲存失敗",
+        "deleteConfirm": "你確定要刪除此工作流程嗎？",
+        "deleteSuccess": "工作流程已成功刪除",
+        "deleteError": "工作流程刪除失敗",
+        "type": "類型",
+        "workflow": "工作流程",
+        "chatflow": "聊天流程",
+        "checkSuccess": "工作流程檢查成功",
+        "checkError": "工作流程檢查失敗",
+        "trigger": "觸發詞"
       }
     },
     "translate": {
@@ -2052,6 +2081,12 @@
           "user_tips": "請輸入應用的執行檔名稱，每行一個，不區分大小寫，可以模糊匹配。例如：chrome.exe、weixin.exe、Cherry Studio.exe等"
         }
       }
+    },
+    "workflow": {
+      "title": "工作流程",
+      "file.input.upload": "上傳檔案",
+      "error.file.ext": "不支援的檔案格式",
+      "pinned": "置頂工作流程"
     }
   }
 }

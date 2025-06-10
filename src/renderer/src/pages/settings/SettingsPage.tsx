@@ -2,6 +2,7 @@ import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
 import ModelSettings from '@renderer/pages/settings/ModelSettings/ModelSettings'
 import {
   Command,
+  GitCompare,
   Globe,
   HardDrive,
   Info,
@@ -30,6 +31,7 @@ import QuickPhraseSettings from './QuickPhraseSettings'
 import SelectionAssistantSettings from './SelectionAssistantSettings/SelectionAssistantSettings'
 import ShortcutSettings from './ShortcutSettings'
 import WebSearchSettings from './WebSearchSettings'
+import WorkflowProviderList from './WorkflowSettings'
 
 const SettingsPage: FC = () => {
   const { pathname } = useLocation()
@@ -63,6 +65,12 @@ const SettingsPage: FC = () => {
               {t('settings.model')}
             </MenuItem>
           </MenuItemLink> */}
+          <MenuItemLink to="/settings/workflow">
+            <MenuItem className={isRoute('/settings/workflow')}>
+              <GitCompare size={18} />
+              {t('settings.workflow.title')}
+            </MenuItem>
+          </MenuItemLink>
           <MenuItemLink to="/settings/web-search">
             <MenuItem className={isRoute('/settings/web-search')}>
               <Globe size={18} />
@@ -120,8 +128,9 @@ const SettingsPage: FC = () => {
         </SettingMenus>
         <SettingContent>
           <Routes>
-            <Route path="provider" element={<ProvidersList />} />
-            <Route path="model" element={<ModelSettings />} />
+            {/* <Route path="provider" element={<ProvidersList />} />
+            <Route path="model" element={<ModelSettings />} /> */}
+            <Route path="workflow" element={<WorkflowProviderList />} />
             <Route path="web-search" element={<WebSearchSettings />} />
             <Route path="mcp/*" element={<MCPSettings />} />
             <Route path="general" element={<GeneralSettings />} />

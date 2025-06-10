@@ -13,6 +13,7 @@ export const DEFAULT_TOOL_ORDER: ToolOrder = {
     'web_search',
     'knowledge_base',
     'mcp_tools',
+    'workflow_tools',
     'generate_image',
     'mention_models'
   ],

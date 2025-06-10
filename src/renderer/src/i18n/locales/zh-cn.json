@@ -337,7 +337,8 @@
       "topics.export.siyuan": "导出到思源笔记",
       "topics.export.wait_for_title_naming": "正在生成标题...",
       "topics.export.title_naming_success": "标题生成成功",
-      "topics.export.title_naming_failed": "标题生成失败，使用默认标题"
+      "topics.export.title_naming_failed": "标题生成失败，使用默认标题",
+      "input.workflow": "工作流"
     },
     "code_block": {
       "collapse": "收起",
@@ -423,7 +424,10 @@
         "pinyin.asc": "按拼音升序",
         "pinyin.desc": "按拼音降序"
       },
-      "no_results": "无结果"
+      "no_results": "无结果",
+      "submit": "提交",
+      "form.validation.required": "{{field}} 是必填的",
+      "goto.settings": "前往设置..."
     },
     "docs": {
       "title": "帮助文档"
@@ -1022,7 +1026,8 @@
       "voyageai": "Voyage AI",
       "qiniu": "七牛云 AI 推理",
       "tokenflux": "TokenFlux",
-      "302ai": "302.AI"
+      "302ai": "302.AI",
+      "dify": "Dify"
     },
     "restore": {
       "confirm": "确定要恢复数据吗？",
@@ -1823,6 +1828,30 @@
         "service_tier.auto": "自动",
         "service_tier.default": "默认",
         "service_tier.flex": "灵活"
+      },
+      "workflow": {
+        "title": "工作流服务",
+        "search": "搜索工作流平台...",
+        "addWorkflow": "添加工作流",
+        "newWorkflow": "新工作流",
+        "addSuccess": "工作流添加成功",
+        "noDescription": "无描述",
+        "name": "名称",
+        "description": "描述",
+        "url": "API 地址",
+        "apiKey": "API 密钥",
+        "apiHost": "API 地址",
+        "saveSuccess": "工作流保存成功",
+        "saveError": "工作流保存失败",
+        "deleteConfirm": "你确定要删除这个工作流吗？",
+        "deleteSuccess": "工作流删除成功",
+        "deleteError": "工作流删除失败",
+        "type": "类型",
+        "workflow": "工作流",
+        "chatflow": "对话流",
+        "checkSuccess": "工作流检查成功",
+        "checkError": "工作流检查失败",
+        "trigger": "触发词"
       }
     },
     "translate": {
@@ -2052,6 +2081,12 @@
           "user_tips": "请输入应用的执行文件名，每行一个，不区分大小写，可以模糊匹配。例如：chrome.exe、weixin.exe、Cherry Studio.exe等"
         }
       }
+    },
+    "workflow": {
+      "title": "工作流",
+      "file.input.upload": "上传文件",
+      "error.file.ext": "不支持的文件格式",
+      "pinned": "置顶工作流"
     }
   }
 }

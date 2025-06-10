@@ -9,6 +9,7 @@ import assistants from './assistants'
 import auth from './auth'
 import backup from './backup'
 import copilot from './copilot'
+import flow from './flow'
 import inputToolsReducer from './inputTools'
 import knowledge from './knowledge'
 import llm from './llm'
@@ -34,6 +35,7 @@ const rootReducer = combineReducers({
   paintings,
   llm,
   settings,
+  flow,
   runtime,
   shortcuts,
   knowledge,

@@ -37,6 +37,7 @@ import NewContextButton from './NewContextButton'
 import QuickPhrasesButton, { QuickPhrasesButtonRef } from './QuickPhrasesButton'
 import ThinkingButton, { ThinkingButtonRef } from './ThinkingButton'
 import WebSearchButton, { WebSearchButtonRef } from './WebSearchButton'
+import WorkflowButton, { WorkflowButtonRef } from './WorkflowButton'
 
 export interface InputbarToolsRef {
   getQuickPanelMenu: (params: {
@@ -123,6 +124,7 @@ const InputbarTools = ({
   const attachmentButtonRef = useRef<AttachmentButtonRef>(null)
   const webSearchButtonRef = useRef<WebSearchButtonRef | null>(null)
   const thinkingButtonRef = useRef<ThinkingButtonRef | null>(null)
+  const workflowButtonRef = useRef<WorkflowButtonRef>(null)
 
   const toolOrder = useAppSelector((state) => state.inputTools.toolOrder)
   const isCollapse = useAppSelector((state) => state.inputTools.isCollapsed)
@@ -345,6 +347,12 @@ const InputbarTools = ({
           />
         )
       },
+      {
+        key: 'workflow_tools',
+        label: t('settings.workflow.title'),
+        component: <WorkflowButton ref={workflowButtonRef} assistant={assistant} ToolbarButton={ToolbarButton} />
+      },
+
       {
         key: 'generate_image',
         label: t('chat.input.generate_image'),

@@ -236,6 +236,22 @@ class FileStorage {
     return fs.readFileSync(filePath, 'utf8')
   }
 
+  public readFileAsFile = async (
+    _: Electron.IpcMainInvokeEvent,
+    filePath: string,
+    fileName: string
+  ): Promise<{ buffer: Buffer; name: string; type: string }> => {
+    const buffer = fs.readFileSync(filePath)
+    const ext = path.extname(filePath).slice(1).toLowerCase()
+    const mimeType = this.getMimeTypeFromExtension(ext)
+
+    return {
+      buffer,
+      name: fileName,
+      type: mimeType
+    }
+  }
+
   public createTempFile = async (_: Electron.IpcMainInvokeEvent, fileName: string): Promise<string> => {
     if (!fs.existsSync(this.tempDir)) {
       fs.mkdirSync(this.tempDir, { recursive: true })
@@ -494,6 +510,24 @@ class FileStorage {
       logger.error('[FileStorage] Download file error:', error)
       throw error
     }
+  }
+
+  private getMimeTypeFromExtension(ext: string): string {
+    const mimeTypes: Record<string, string> = {
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      pdf: 'application/pdf',
+      txt: 'text/plain',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      zip: 'application/zip',
+      md: 'text/markdown'
+      // 添加更多常用类型
+    }
+
+    return mimeTypes[ext] || 'application/octet-stream'
   }
 
   private getExtensionFromMimeType(mimeType: string | null): string {

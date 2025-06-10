@@ -3,6 +3,7 @@ import { DEFAULT_CONTEXTCOUNT, DEFAULT_TEMPERATURE } from '@renderer/config/cons
 import { TopicManager } from '@renderer/hooks/useTopic'
 import { getDefaultAssistant, getDefaultTopic } from '@renderer/services/AssistantService'
 import { Assistant, AssistantSettings, Model, Topic } from '@renderer/types'
+import { Chatflow } from '@renderer/types/flow'
 import { isEmpty, uniqBy } from 'lodash'
 
 export interface AssistantsState {
@@ -133,6 +134,16 @@ const assistantsSlice = createSlice({
     },
     setTagsOrder: (state, action: PayloadAction<string[]>) => {
       state.tagsOrder = action.payload
+    },
+    setChatflow: (state, action: PayloadAction<{ assistantId: string; chatflow: Chatflow }>) => {
+      state.assistants = state.assistants.map((assistant) =>
+        assistant.id === action.payload.assistantId
+          ? {
+              ...assistant,
+              chatflow: action.payload.chatflow
+            }
+          : assistant
+      )
     }
   }
 })
@@ -150,7 +161,8 @@ export const {
   removeAllTopics,
   setModel,
   setTagsOrder,
-  updateAssistantSettings
+  updateAssistantSettings,
+  setChatflow
 } = assistantsSlice.actions
 
 export default assistantsSlice.reducer

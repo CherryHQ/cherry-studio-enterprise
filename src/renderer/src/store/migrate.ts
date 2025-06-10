@@ -11,6 +11,7 @@ import { isEmpty } from 'lodash'
 import { createMigrate } from 'redux-persist'
 
 import { RootState } from '.'
+import { INITIAL_FLOW_ENGINE_PROVIDERS } from './flow'
 import { DEFAULT_TOOL_ORDER } from './inputTools'
 import { INITIAL_PROVIDERS, moveProvider } from './llm'
 import { mcpSlice } from './mcp'
@@ -85,6 +86,17 @@ function addSelectionAction(state: RootState, id: string) {
       const action = defaultActionItems.find((item) => item.id === id)
       if (action) {
         state.selectionStore.actionItems.push(action)
+      }
+    }
+  }
+}
+
+function addFlowEngineProvider(state: RootState, id: string) {
+  if (state.flow && state.flow.providers) {
+    if (!state.flow.providers.find((p) => p.id === id)) {
+      const _provider = INITIAL_FLOW_ENGINE_PROVIDERS.find((p) => p.id === id)
+      if (_provider) {
+        state.flow.providers.push(_provider)
       }
     }
   }
@@ -1565,6 +1577,11 @@ const migrateConfig = {
       addProvider(state, '302ai')
       state.llm.providers = moveProvider(state.llm.providers, 'cephalon', 13)
       state.llm.providers = moveProvider(state.llm.providers, '302ai', 14)
+      addFlowEngineProvider(state, 'dify')
+      state.assistants.defaultAssistant.mode = 'system'
+      state.assistants.assistants.forEach((assistant) => {
+        assistant.mode = 'system'
+      })
       return state
     } catch (error) {
       return state

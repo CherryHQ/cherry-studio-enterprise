@@ -14,6 +14,8 @@ import type {
   WebSearchResponse,
   WebSearchSource
 } from '.'
+import { ChunkType } from './chunk'
+import { Flow, FlowNode } from './flow'
 
 // MessageBlock 类型枚举 - 根据实际API返回特性优化
 export enum MessageBlockType {
@@ -26,7 +28,9 @@ export enum MessageBlockType {
   TOOL = 'tool', // Added unified tool block type
   FILE = 'file', // 文件内容
   ERROR = 'error', // 错误信息
-  CITATION = 'citation' // 引用类型 (Now includes web search, grounding, etc.)
+  CITATION = 'citation', // 引用类型 (Now includes web search, grounding, etc.)
+  FLOW = 'flow', // 流程图
+  FORM = 'form' // 表格
 }
 
 // 块状态定义
@@ -131,6 +135,22 @@ export interface ErrorMessageBlock extends BaseMessageBlock {
   type: MessageBlockType.ERROR
 }
 
+// flow 块
+export interface FlowMessageBlock extends BaseMessageBlock {
+  type: MessageBlockType.FLOW
+  chunkType: ChunkType
+  flow: Flow
+  nodes?: FlowNode[]
+  conversationId: string
+  taskId: string
+}
+// form表格
+export interface FormMessageBlock extends BaseMessageBlock {
+  type: MessageBlockType.FORM
+  flow: Flow
+  isFinished: boolean
+}
+
 // MessageBlock 联合类型
 export type MessageBlock =
   | PlaceholderMessageBlock
@@ -143,6 +163,8 @@ export type MessageBlock =
   | FileMessageBlock
   | ErrorMessageBlock
   | CitationMessageBlock
+  | FlowMessageBlock
+  | FormMessageBlock
 
 export enum UserMessageStatus {
   SUCCESS = 'success'
@@ -174,6 +196,7 @@ export type Message = {
   askId?: string // 关联的问题消息ID
   mentions?: Model[]
   enabledMCPs?: MCPServer[]
+  flow?: Flow
 
   usage?: Usage
   metrics?: Metrics

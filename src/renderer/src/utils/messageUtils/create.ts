@@ -1,12 +1,16 @@
 import Logger from '@renderer/config/logger'
 import type { Assistant, FileType, Topic } from '@renderer/types'
 import { FileTypes } from '@renderer/types'
+import { ChunkType } from '@renderer/types/chunk'
+import { Flow } from '@renderer/types/flow'
 import type {
   BaseMessageBlock,
   CitationMessageBlock,
   CodeMessageBlock,
   ErrorMessageBlock,
   FileMessageBlock,
+  FlowMessageBlock,
+  FormMessageBlock,
   ImageMessageBlock,
   MainTextMessageBlock,
   Message,
@@ -272,6 +276,53 @@ export function createCitationBlock(
     knowledge
   }
 }
+
+/**
+ * Creates a Workflow Block.
+ * @param messageId - The ID of the parent message.
+ * @param chunkType
+ * @param workflowId - The ID of the workflow.
+ * @param overrides - Optional properties to override the defaults.
+ * @returns A WorkflowBlock object.
+ */
+export function createFlowBlock(
+  messageId: string,
+  chunkType: ChunkType,
+  flow: Flow,
+  overrides: Partial<Omit<FlowMessageBlock, 'id' | 'messageId' | 'type'>> = {}
+): FlowMessageBlock {
+  const baseBlock = createBaseMessageBlock(messageId, MessageBlockType.FLOW, {
+    status: MessageBlockStatus.SUCCESS,
+    chunkType: chunkType,
+    flow: flow,
+    ...overrides
+  })
+  return baseBlock as FlowMessageBlock
+}
+
+/**
+ *
+ */
+export function createFormBlock(
+  messageId: string,
+  flow: Flow,
+  overrides: Partial<Omit<FormMessageBlock, 'id' | 'messageId' | 'type'>> = {}
+): FormMessageBlock {
+  const baseBlock = createBaseMessageBlock(messageId, MessageBlockType.FORM, {
+    status: MessageBlockStatus.SUCCESS,
+    flow: flow,
+    ...overrides
+  })
+  return baseBlock as FormMessageBlock
+}
+/**
+ * Creates a new Message object
+ * @param role - The role of the message sender ('user' or 'assistant').
+ * @param topicId - The ID of the topic this message belongs to.
+ * @param assistantId - The ID of the assistant (relevant for assistant messages).
+ * @param overrides - Optional properties to override the defaults. Initial blocks can be passed here.
+ * @returns A Message object.
+ */
 
 /**
  * Creates a new Message object

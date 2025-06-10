@@ -21,13 +21,14 @@ import type {
 import { AssistantMessageStatus, MessageBlockStatus, MessageBlockType } from '@renderer/types/newMessage'
 import { Response } from '@renderer/types/newMessage'
 import { uuid } from '@renderer/utils'
-import { formatErrorMessage, isAbortError } from '@renderer/utils/error'
+import { isAbortError } from '@renderer/utils/error'
 import { extractUrlsFromMarkdown } from '@renderer/utils/linkConverter'
 import {
   createAssistantMessage,
   createBaseMessageBlock,
   createCitationBlock,
   createErrorBlock,
+  createFormBlock,
   createImageBlock,
   createMainTextBlock,
   createThinkingBlock,
@@ -35,8 +36,8 @@ import {
   createTranslationBlock,
   resetAssistantMessage
 } from '@renderer/utils/messageUtils/create'
+import { getMainTextContent } from '@renderer/utils/messageUtils/find'
 import { getTopicQueue, waitForTopicQueue } from '@renderer/utils/queue'
-import { isOnHomePage } from '@renderer/utils/window'
 import { t } from 'i18next'
 import { isEmpty, throttle } from 'lodash'
 import { LRUCache } from 'lru-cache'
@@ -44,30 +45,27 @@ import { LRUCache } from 'lru-cache'
 import type { AppDispatch, RootState } from '../index'
 import { removeManyBlocks, updateOneBlock, upsertManyBlocks, upsertOneBlock } from '../messageBlock'
 import { newMessagesActions, selectMessagesForTopic } from '../newMessage'
+import { fetchAndProcessChatflowResponseImpl } from './flowThunk'
 
-const handleChangeLoadingOfTopic = async (topicId: string) => {
+export const handleChangeLoadingOfTopic = async (topicId: string) => {
   await waitForTopicQueue(topicId)
   store.dispatch(newMessagesActions.setTopicLoading({ topicId, loading: false }))
 }
 // TODO: 后续可以将db操作移到Listener Middleware中
-export const saveMessageAndBlocksToDB = async (message: Message, blocks: MessageBlock[], messageIndex: number = -1) => {
+export const saveMessageAndBlocksToDB = async (message: Message, blocks: MessageBlock[]) => {
   try {
     if (blocks.length > 0) {
       await db.message_blocks.bulkPut(blocks)
     }
     const topic = await db.topics.get(message.topicId)
     if (topic) {
-      const _messageIndex = topic.messages.findIndex((m) => m.id === message.id)
+      const messageIndex = topic.messages.findIndex((m) => m.id === message.id)
       const updatedMessages = [...topic.messages]
 
-      if (_messageIndex !== -1) {
-        updatedMessages[_messageIndex] = message
+      if (messageIndex !== -1) {
+        updatedMessages[messageIndex] = message
       } else {
-        if (messageIndex !== -1) {
-          updatedMessages.splice(messageIndex, 0, message)
-        } else {
-          updatedMessages.push(message)
-        }
+        updatedMessages.push(message)
       }
       await db.topics.update(message.topicId, { messages: updatedMessages })
     } else {
@@ -165,7 +163,7 @@ const getBlockThrottler = (id: string) => {
 /**
  * 更新单个消息块。
  */
-const throttledBlockUpdate = (id: string, blockUpdate: any) => {
+export const throttledBlockUpdate = (id: string, blockUpdate: any) => {
   const throttler = getBlockThrottler(id)
   throttler(blockUpdate)
 }
@@ -238,7 +236,7 @@ export const cleanupMultipleBlocks = (dispatch: AppDispatch, blockIds: string[])
 // )
 
 // 新增: 通用的、非节流的函数，用于保存消息和块的更新到数据库
-const saveUpdatesToDB = async (
+export const saveUpdatesToDB = async (
   messageId: string,
   topicId: string,
   messageUpdates: Partial<Message>, // 需要更新的消息字段
@@ -257,7 +255,7 @@ const saveUpdatesToDB = async (
 }
 
 // 新增: 辅助函数，用于获取并保存单个更新后的 Block 到数据库
-const saveUpdatedBlockToDB = async (
+export const saveUpdatedBlockToDB = async (
   blockId: string | null,
   messageId: string,
   topicId: string,
@@ -666,23 +664,21 @@ const fetchAndProcessAssistantResponseImpl = async (
 
         const serializableError = {
           name: error.name,
-          message: pauseErrorLanguagePlaceholder || error.message || formatErrorMessage(error),
+          message: pauseErrorLanguagePlaceholder || error.message || 'Stream processing error',
           originalMessage: error.message,
           stack: error.stack,
           status: error.status || error.code,
           requestId: error.request_id
         }
-        if (!isOnHomePage()) {
-          await notificationService.send({
-            id: uuid(),
-            type: 'error',
-            title: t('notification.assistant'),
-            message: serializableError.message,
-            silent: false,
-            timestamp: Date.now(),
-            source: 'assistant'
-          })
-        }
+        await notificationService.send({
+          id: uuid(),
+          type: 'error',
+          title: t('notification.assistant'),
+          message: serializableError.message,
+          silent: false,
+          timestamp: Date.now(),
+          source: 'assistant'
+        })
 
         if (lastBlockId) {
           // 更改上一个block的状态为ERROR
@@ -730,18 +726,16 @@ const fetchAndProcessAssistantResponseImpl = async (
             saveUpdatedBlockToDB(lastBlockId, assistantMsgId, topicId, getState)
           }
 
-          // const content = getMainTextContent(finalAssistantMsg)
-          // if (!isOnHomePage()) {
-          //   await notificationService.send({
-          //     id: uuid(),
-          //     type: 'success',
-          //     title: t('notification.assistant'),
-          //     message: content.length > 50 ? content.slice(0, 47) + '...' : content,
-          //     silent: false,
-          //     timestamp: Date.now(),
-          //     source: 'assistant'
-          //   })
-          // }
+          const content = getMainTextContent(finalAssistantMsg)
+          await notificationService.send({
+            id: uuid(),
+            type: 'success',
+            title: t('notification.assistant'),
+            message: content.length > 50 ? content.slice(0, 47) + '...' : content,
+            silent: false,
+            timestamp: Date.now(),
+            source: 'assistant'
+          })
 
           // 更新topic的name
           autoRenameTopic(assistant, topicId)
@@ -817,19 +811,40 @@ export const sendMessage =
       const mentionedModels = userMessage.mentions
       const queue = getTopicQueue(topicId)
 
-      if (mentionedModels && mentionedModels.length > 0) {
-        await dispatchMultiModelResponses(dispatch, getState, topicId, userMessage, assistant, mentionedModels)
+      if (assistant.mode === 'system') {
+        console.log(
+          'assistant.workflow',
+          assistant.workflow,
+          getMainTextContent(userMessage) === assistant.workflow?.trigger
+        )
+        if (mentionedModels && mentionedModels.length > 0) {
+          await _handleSystemMultiModelResponse(dispatch, getState, topicId, userMessage, assistant, mentionedModels)
+        } else if (assistant.workflow && getMainTextContent(userMessage) === assistant.workflow.trigger) {
+          await _handleSystemWorkflowTrigger(dispatch, topicId, assistant, userMessage.id)
+        } else {
+          await _handleSystemRegularResponse(dispatch, getState, topicId, userMessage, assistant, queue)
+        }
       } else {
-        const assistantMessage = createAssistantMessage(assistant.id, topicId, {
-          askId: userMessage.id,
-          model: assistant.model
-        })
-        await saveMessageAndBlocksToDB(assistantMessage, [])
-        dispatch(newMessagesActions.addMessage({ topicId, message: assistantMessage }))
+        // Chatflow mode
+        if (assistant.chatflow) {
+          const assistantMessageForChatflow = createAssistantMessage(assistant.id, topicId, {
+            askId: userMessage.id,
+            flow: assistant.chatflow
+          })
 
-        queue.add(async () => {
-          await fetchAndProcessAssistantResponseImpl(dispatch, getState, topicId, assistant, assistantMessage)
-        })
+          if (getMainTextContent(userMessage) === assistant.chatflow.trigger) {
+            await _handleChatflowTrigger(dispatch, topicId, assistant, assistantMessageForChatflow)
+          } else {
+            await _handleChatflowRegularResponse(
+              dispatch,
+              getState,
+              topicId,
+              assistant,
+              assistantMessageForChatflow,
+              queue
+            )
+          }
+        }
       }
     } catch (error) {
       console.error('Error in sendMessage thunk:', error)
@@ -994,7 +1009,73 @@ export const resendMessageThunk =
       const state = getState()
       // Use selector to get all messages for the topic
       const allMessagesForTopic = selectMessagesForTopic(state, topicId)
+      const mainUserMessageContent = getMainTextContent(userMessageToResend)
 
+      if (
+        (assistant.workflow && mainUserMessageContent === assistant.workflow.trigger) ||
+        (assistant.chatflow && mainUserMessageContent === assistant.chatflow.trigger)
+      ) {
+        const flow = assistant.workflow || assistant.chatflow
+        if (!flow) {
+          throw new Error('No workflow or chatflow found for the assistant.')
+        }
+        // 查找用户消息对应的所有助手回复
+        const assistantMessagesToReset = allMessagesForTopic.filter(
+          (m) => m.askId === userMessageToResend.id && m.role === 'assistant'
+        )
+
+        // 如果没有找到现有的助手消息，则创建新的表单消息
+        if (assistantMessagesToReset.length === 0) {
+          let assistantMessage = createAssistantMessage(assistant.id, topicId, {
+            askId: userMessageToResend.id,
+            flow: flow
+          })
+          const formBlock = createFormBlock(assistantMessage.id, flow)
+          assistantMessage = { ...assistantMessage, blocks: [formBlock.id] }
+
+          dispatch(newMessagesActions.addMessage({ topicId, message: assistantMessage }))
+          dispatch(upsertOneBlock(formBlock))
+
+          await saveMessageAndBlocksToDB(assistantMessage, [formBlock])
+        } else {
+          // 重用现有助手消息，只重置其状态和块
+          const originalMsg = assistantMessagesToReset[0]
+          const blockIdsToDelete = [...(originalMsg.blocks || [])]
+
+          // 重置助手消息，保留原始ID和必要信息
+          const resetMsg = resetAssistantMessage(originalMsg, {
+            status: AssistantMessageStatus.PENDING,
+            updatedAt: new Date().toISOString()
+          })
+
+          // 为重置的消息创建新的表单块
+          const formBlock = createFormBlock(resetMsg.id, flow)
+          const updatedResetMsg = { ...resetMsg, blocks: [formBlock.id] }
+
+          // 更新Redux
+          dispatch(
+            newMessagesActions.updateMessage({
+              topicId,
+              messageId: resetMsg.id,
+              updates: updatedResetMsg
+            })
+          )
+          dispatch(upsertOneBlock(formBlock))
+
+          // 删除旧块
+          if (blockIdsToDelete.length > 0) {
+            dispatch(removeManyBlocks(blockIdsToDelete))
+            await db.message_blocks.bulkDelete(blockIdsToDelete)
+          }
+
+          // 保存到数据库
+          const finalMessagesToSave = selectMessagesForTopic(getState(), topicId)
+          await db.topics.update(topicId, { messages: finalMessagesToSave })
+        }
+
+        handleChangeLoadingOfTopic(topicId)
+        return
+      }
       // Filter to find the assistant messages to reset
       const assistantMessagesToReset = allMessagesForTopic.filter(
         (m) => m.askId === userMessageToResend.id && m.role === 'assistant'
@@ -1036,7 +1117,11 @@ export const resendMessageThunk =
         const resetMsg = resetAssistantMessage(originalMsg, {
           status: AssistantMessageStatus.PENDING,
           updatedAt: new Date().toISOString(),
-          ...(assistantMessagesToReset.length === 1 ? { model: assistant.model } : {})
+          ...(assistantMessagesToReset.length === 1
+            ? assistant.chatflow
+              ? { flow: originalMsg.flow }
+              : { model: assistant.model }
+            : {})
         })
 
         resetDataList.push(resetMsg)
@@ -1063,9 +1148,28 @@ export const resendMessageThunk =
           ...assistant,
           ...(resetMsg.model ? { model: resetMsg.model } : {})
         }
-        queue.add(async () => {
-          await fetchAndProcessAssistantResponseImpl(dispatch, getState, topicId, assistantConfigForThisRegen, resetMsg)
-        })
+        if (assistant.chatflow) {
+          queue.add(async () => {
+            await fetchAndProcessChatflowResponseImpl(
+              dispatch,
+              getState,
+              topicId,
+              assistantConfigForThisRegen,
+              resetMsg
+            )
+          })
+        } else {
+          // Otherwise, use the standard assistant response implementation
+          queue.add(async () => {
+            await fetchAndProcessAssistantResponseImpl(
+              dispatch,
+              getState,
+              topicId,
+              assistantConfigForThisRegen,
+              resetMsg
+            )
+          })
+        }
       }
     } catch (error) {
       console.error(`[resendMessageThunk] Error resending user message ${userMessageToResend.id}:`, error)
@@ -1163,17 +1267,43 @@ export const regenerateAssistantResponseThunk =
       const queue = getTopicQueue(topicId)
       const assistantConfigForRegen = {
         ...assistant,
+        ...(resetAssistantMsg.flow ? { flow: resetAssistantMsg.flow } : {}),
         ...(resetAssistantMsg.model ? { model: resetAssistantMsg.model } : {})
       }
-      queue.add(async () => {
-        await fetchAndProcessAssistantResponseImpl(
-          dispatch,
-          getState,
-          topicId,
-          assistantConfigForRegen,
-          resetAssistantMsg
-        )
-      })
+      if (assistantConfigForRegen.mode === 'system') {
+        if (
+          assistantConfigForRegen.workflow &&
+          getMainTextContent(originalUserQuery) === assistantConfigForRegen.workflow.trigger
+        ) {
+          await _handleSystemWorkflowTrigger(
+            dispatch,
+            topicId,
+            assistantConfigForRegen,
+            resetAssistantMsg.askId,
+            resetAssistantMsg
+          )
+          return
+        }
+        queue.add(async () => {
+          await fetchAndProcessAssistantResponseImpl(
+            dispatch,
+            getState,
+            topicId,
+            assistantConfigForRegen,
+            resetAssistantMsg
+          )
+        })
+      } else {
+        queue.add(async () => {
+          await fetchAndProcessChatflowResponseImpl(
+            dispatch,
+            getState,
+            topicId,
+            assistantConfigForRegen,
+            resetAssistantMsg
+          )
+        })
+      }
     } catch (error) {
       console.error(
         `[regenerateAssistantResponseThunk] Error regenerating response for assistant message ${assistantMessageToRegenerate.id}:`,
@@ -1320,14 +1450,10 @@ export const appendAssistantResponseThunk =
       })
 
       // 3. Update Redux Store
-      const currentTopicMessageIds = getState().messages.messageIdsByTopic[topicId] || []
-      const existingMessageIndex = currentTopicMessageIds.findIndex((id) => id === existingAssistantMessageId)
-      const insertAtIndex = existingMessageIndex !== -1 ? existingMessageIndex + 1 : currentTopicMessageIds.length
-
-      dispatch(newMessagesActions.insertMessageAtIndex({ topicId, message: newAssistantStub, index: insertAtIndex }))
+      dispatch(newMessagesActions.addMessage({ topicId, message: newAssistantStub }))
 
       // 4. Update Database (Save the stub to the topic's message list)
-      await saveMessageAndBlocksToDB(newAssistantStub, [], insertAtIndex)
+      await saveMessageAndBlocksToDB(newAssistantStub, [])
 
       // 5. Prepare and queue the processing task
       const assistantConfigForThisCall = {
@@ -1609,3 +1735,123 @@ export const removeBlocksThunk =
       throw error
     }
   }
+
+async function _handleSystemMultiModelResponse(
+  dispatch: AppDispatch,
+  getState: () => RootState,
+  topicId: string,
+  userMessage: Message,
+  assistant: Assistant,
+  mentionedModels: Model[]
+) {
+  await dispatchMultiModelResponses(dispatch, getState, topicId, userMessage, assistant, mentionedModels)
+}
+
+async function _handleSystemWorkflowTrigger(
+  dispatch: AppDispatch,
+  topicId: string,
+  assistant: Assistant,
+  askId?: string,
+  resetAssistantMsg?: Message
+) {
+  if (resetAssistantMsg) {
+    const formBlock = createFormBlock(resetAssistantMsg.id, assistant.workflow!)
+    // 更新重置消息的块引用
+    dispatch(
+      newMessagesActions.updateMessage({
+        topicId,
+        messageId: resetAssistantMsg.id,
+        updates: { blocks: [formBlock.id] }
+      })
+    )
+    dispatch(upsertOneBlock(formBlock))
+    dispatch(
+      newMessagesActions.upsertBlockReference({
+        messageId: resetAssistantMsg.id,
+        blockId: formBlock.id,
+        status: formBlock.status
+      })
+    )
+    await saveUpdatesToDB(resetAssistantMsg.id, topicId, { blocks: [formBlock.id] }, [formBlock])
+  }
+  // 如果是创建新消息
+  else {
+    let assistantMessage = createAssistantMessage(assistant.id, topicId, {
+      askId: askId ?? '',
+      model: assistant.model,
+      flow: assistant.workflow
+    })
+    const formBlock = createFormBlock(assistantMessage.id, assistant.workflow!)
+    assistantMessage = {
+      ...assistantMessage,
+      blocks: [formBlock.id]
+    }
+    dispatch(newMessagesActions.addMessage({ topicId, message: assistantMessage }))
+    dispatch(upsertOneBlock(formBlock))
+    dispatch(
+      newMessagesActions.upsertBlockReference({
+        messageId: assistantMessage.id,
+        blockId: formBlock.id,
+        status: formBlock.status
+      })
+    )
+    await saveMessageAndBlocksToDB(assistantMessage, [formBlock])
+  }
+}
+
+async function _handleSystemRegularResponse(
+  dispatch: AppDispatch,
+  getState: () => RootState,
+  topicId: string,
+  userMessage: Message,
+  assistant: Assistant,
+  queue: any // Consider using a more specific type for queue if available (e.g., PQueue)
+) {
+  const assistantMessage = createAssistantMessage(assistant.id, topicId, {
+    askId: userMessage.id,
+    model: assistant.model
+  })
+  await saveMessageAndBlocksToDB(assistantMessage, [])
+  dispatch(newMessagesActions.addMessage({ topicId, message: assistantMessage }))
+  queue.add(async () => {
+    await fetchAndProcessAssistantResponseImpl(dispatch, getState, topicId, assistant, assistantMessage)
+  })
+}
+
+async function _handleChatflowTrigger(
+  dispatch: AppDispatch,
+  topicId: string,
+  assistant: Assistant,
+  initialAssistantMessage: Message
+) {
+  const formBlock = createFormBlock(initialAssistantMessage.id, assistant.chatflow!)
+  const finalAssistantMessage = {
+    ...initialAssistantMessage,
+    blocks: [formBlock.id]
+  }
+  dispatch(newMessagesActions.addMessage({ topicId, message: finalAssistantMessage }))
+  dispatch(upsertOneBlock(formBlock))
+  dispatch(
+    newMessagesActions.upsertBlockReference({
+      messageId: finalAssistantMessage.id,
+      blockId: formBlock.id,
+      status: formBlock.status
+    })
+  )
+  await saveMessageAndBlocksToDB(finalAssistantMessage, [formBlock])
+}
+
+async function _handleChatflowRegularResponse(
+  dispatch: AppDispatch,
+  getState: () => RootState,
+  topicId: string,
+  assistant: Assistant,
+  assistantMessage: Message,
+  queue: any // Consider using a more specific type for queue if available (e.g., PQueue)
+) {
+  await saveMessageAndBlocksToDB(assistantMessage, [])
+  dispatch(newMessagesActions.addMessage({ topicId, message: assistantMessage }))
+  queue.add(async () => {
+    await fetchAndProcessChatflowResponseImpl(dispatch, getState, topicId, assistant, assistantMessage)
+  })
+}
