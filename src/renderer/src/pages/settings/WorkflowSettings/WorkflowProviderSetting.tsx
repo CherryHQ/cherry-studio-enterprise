@@ -223,7 +223,7 @@ const DetailViewContainer = styled.div`
 `
 
 const BackButtonContainer = styled.div`
-  padding: 16px 0 0 20px;
+  padding: 0;
   width: 100%;
 `
 

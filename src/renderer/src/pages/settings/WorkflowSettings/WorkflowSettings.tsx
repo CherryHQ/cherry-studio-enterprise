@@ -114,7 +114,7 @@ const WorkflowSettings: FC<Props> = ({ flow: _flow }) => {
   }, [_flow])
 
   return (
-    <SettingContainer theme={theme} style={{ background: 'var(--color-background)' }}>
+    <SettingContainer theme={theme} style={{ background: 'var(--color-background)', padding: 0 }}>
       <SettingGroup style={{ marginBottom: 0 }}>
         <SettingTitle>
           <Flex justify="space-between" align="center" gap={5} style={{ marginRight: 10 }}>
