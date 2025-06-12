@@ -1,21 +1,22 @@
-import { MessageBlockStatus } from './newMessage'
+import { Workflow as IWorkflow, WorkflowTypeEnum } from '@cherrystudio/api-sdk'
 
+import { MessageBlockStatus } from './newMessage'
 export type FlowType = 'workflow' | 'chatflow'
 
-/**
- * 定义 Workflow 类型的工作流配置
- */
-interface FlowBase {
-  id: string // 工作流唯一标识
-  providerId: string // 所属 Provider 的 ID
-  name: string // 工作流名称
-  description?: string // 工作流描述
-  enabled: boolean // 是否启用
-  apiKey: string
-  apiHost: string
-  parameters?: IUserInputForm[]
-  inputs?: Record<string, string> // 保存工作流输入参数
-}
+// /**
+//  * 定义 Workflow 类型的工作流配置
+//  */
+// interface FlowBase {
+//   id: string // 工作流唯一标识
+//   providerId: string // 所属 Provider 的 ID
+//   name: string // 工作流名称
+//   description?: string // 工作流描述
+//   enabled: boolean // 是否启用
+//   apiKey: string
+//   apiHost: string
+//   parameters?: IUserInputForm[]
+//   inputs?: Record<string, string> // 保存工作流输入参数
+// }
 
 /**
  * 用户输入表单控件类型
@@ -49,17 +50,17 @@ export interface IUserInputFormItemValueBase {
  */
 export type IUserInputForm = Record<IUserInputFormItemType, IUserInputFormItemValueBase>
 
-export interface Workflow extends FlowBase {
-  type: 'workflow'
-  trigger: string
+export interface Workflow extends IWorkflow {
+  type: WorkflowTypeEnum.WORKFLOW
+  inputs?: Record<string, string>
 }
 
 /**
  * 定义 Chatflow 类型的工作流配置
  */
-export interface Chatflow extends FlowBase {
-  type: 'chatflow'
-  trigger: string
+export interface Chatflow extends IWorkflow {
+  type: WorkflowTypeEnum.CHATFLOW
+  inputs?: Record<string, string>
 }
 
 /**

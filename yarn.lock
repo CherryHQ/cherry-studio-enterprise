@@ -509,12 +509,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cherrystudio/api-sdk@npm:^0.0.20":
-  version: 0.0.20
-  resolution: "@cherrystudio/api-sdk@npm:0.0.20"
+"@cherrystudio/api-sdk@npm:^0.0.26":
+  version: 0.0.26
+  resolution: "@cherrystudio/api-sdk@npm:0.0.26"
   dependencies:
     axios: "npm:^1.6.1"
-  checksum: 10c0/dc8f94892b47e9a60a795076cc5c83c530fbde998d9b999705f0f5834d8829106e11d3932a7bcb7e1561599322f7ad1a6194aad0b92e71cdd584573646ef8dc9
+  checksum: 10c0/bf41267df744e0eec0c6845e3c72b552213562c3e197246d77a7f03c703342a9c2105111e1db152ea15558a2a22b22d6d9f51f72c1d59bf48caeced56c4fc47b
   languageName: node
   linkType: hard
 
@@ -5616,7 +5616,7 @@ __metadata:
     "@agentic/tavily": "npm:^7.3.3"
     "@ant-design/v5-patch-for-react-19": "npm:^1.0.3"
     "@anthropic-ai/sdk": "npm:^0.41.0"
-    "@cherrystudio/api-sdk": "npm:^0.0.20"
+    "@cherrystudio/api-sdk": "npm:^0.0.26"
     "@cherrystudio/embedjs": "npm:^0.1.31"
     "@cherrystudio/embedjs-libsql": "npm:^0.1.31"
     "@cherrystudio/embedjs-loader-csv": "npm:^0.1.31"

@@ -3,7 +3,7 @@ import { TopView } from '@renderer/components/TopView'
 import { getModelLogo, isEmbeddingModel, isRerankModel } from '@renderer/config/models'
 import { getFlowEngineProviderLogo } from '@renderer/config/workflowProviders'
 import db from '@renderer/databases'
-import { useFlowEngineProviders } from '@renderer/hooks/useFlowEngineProvider'
+import { useChatflows } from '@renderer/hooks/useFlowEngineProvider'
 import { useProviders } from '@renderer/hooks/useProvider'
 import { getModelUniqId } from '@renderer/services/ModelService'
 import { isModel, Model, ModelOrChatflowItem } from '@renderer/types'
@@ -34,11 +34,11 @@ const PopupContainer: React.FC<PopupContainerProps> = ({ item, resolve }) => {
   const inputRef = useRef<InputRef>(null)
   const { providers } = useProviders()
   const [pinnedModels, setPinnedModels] = useState<string[]>([])
-  const { flowEngineProviders } = useFlowEngineProviders()
   const [pinnedFlows, setPinnedFlows] = useState<string[]>([])
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [keyboardSelectedId, setKeyboardSelectedId] = useState<string>('')
   const menuItemRefs = useRef<Record<string, HTMLElement | null>>({})
+  const { chatflows } = useChatflows()
 
   const setMenuItemRef = useCallback(
     (key: string) => (el: HTMLElement | null) => {
@@ -71,7 +71,7 @@ const PopupContainer: React.FC<PopupContainerProps> = ({ item, resolve }) => {
       const savedPinnedFlows = setting?.value || []
 
       // Filter out invalid pinned flows
-      const allFlowIds = flowEngineProviders.flatMap((f) => f.flows || []).map((f) => f.id)
+      const allFlowIds = chatflows.map((f) => f.id)
       const validPinnedFlows = savedPinnedFlows.filter((id) => allFlowIds.includes(id))
 
       // Update storage if there were invalid flows
@@ -83,7 +83,7 @@ const PopupContainer: React.FC<PopupContainerProps> = ({ item, resolve }) => {
     }
     loadPinnedModels()
     loadPinnedFlows()
-  }, [providers, flowEngineProviders])
+  }, [providers, chatflows])
 
   const togglePinModel = async (id: string) => {
     const newPinnedModels = pinnedModels.includes(id) ? pinnedModels.filter((id) => id !== id) : [...pinnedModels, id]
@@ -122,31 +122,6 @@ const PopupContainer: React.FC<PopupContainerProps> = ({ item, resolve }) => {
       return sortBy(models, ['group', 'name'])
     },
     [searchText, t, pinnedModels]
-  )
-
-  // filter flows with search text
-  const getFilteredFlows = useCallback(
-    (provider) => {
-      let flows = provider.flows
-
-      if (searchText.trim()) {
-        const keywords = searchText.toLowerCase().split(/\s+/).filter(Boolean)
-        flows = flows.filter((f) => {
-          const fullName = provider.isSystem
-            ? `${f.name} ${provider.name} ${t('provider.' + provider.id)}`
-            : `${f.name} ${provider.name}`
-
-          const lowerFullName = fullName.toLowerCase()
-          return keywords.every((keyword) => lowerFullName.includes(keyword))
-        })
-      } else {
-        // 如果不是搜索状态，过滤掉已固定的模型
-        flows = flows.filter((f) => !pinnedFlows.includes(f.id))
-      }
-
-      return sortBy(flows, ['name'])
-    },
-    [searchText, t, pinnedFlows]
   )
 
   // 递归处理菜单项，为每个项添加ref
@@ -268,90 +243,81 @@ const PopupContainer: React.FC<PopupContainerProps> = ({ item, resolve }) => {
     }
   }
   // add flow
-  const flowMenuItems: MenuItem[] = flowEngineProviders
-    .filter((f) => f.flows && f.flows.length > 0)
-    .map((f) => {
-      const filteredFlows = getFilteredFlows(f)
-        .filter((f) => f.type === 'chatflow') // Only keep chatflow items
-        .map((f) => ({
-          key: f.id,
-          label: (
-            <Item>
-              <NameRow>
-                <span>{f?.name}</span>
-              </NameRow>
-              <PinIcon
-                onClick={(e) => {
-                  e.stopPropagation()
-                  togglePinFlow(f.id)
-                }}
-                isPinned={pinnedFlows.includes(f.id)}>
-                <PushpinOutlined />
-              </PinIcon>
-            </Item>
-          ),
-          icon: (
-            <Avatar src={getFlowEngineProviderLogo(f.providerId)} size={24}>
-              {first(f?.name)}
-            </Avatar>
-          ),
-          onClick: () => {
-            resolve(f)
-            setOpen(false)
-          }
-        }))
-      return filteredFlows.length > 0
-        ? {
-            key: f.id,
-            label: f.name,
-            type: 'group',
-            children: filteredFlows
-          }
-        : null
+  const filteredFlows = chatflows
+    .filter((f) => {
+      if (searchText.trim()) {
+        const keywords = searchText.toLowerCase().split(/\s+/).filter(Boolean)
+        const fullName = f.name.toLowerCase()
+        return keywords.every((keyword) => fullName.includes(keyword))
+      } else {
+        return !pinnedFlows.includes(f.id)
+      }
     })
-  filteredItems.push(...flowMenuItems)
+    .map((f) => ({
+      key: f.id,
+      label: (
+        <Item>
+          <NameRow>
+            <span>{f?.name}</span>
+          </NameRow>
+          <PinIcon
+            onClick={(e) => {
+              e.stopPropagation()
+              togglePinFlow(f.id)
+            }}
+            isPinned={pinnedFlows.includes(f.id)}>
+            <PushpinOutlined />
+          </PinIcon>
+        </Item>
+      ),
+      icon: (
+        <Avatar src={getFlowEngineProviderLogo(f.providerId)} size={24}>
+          {first(f?.name)}
+        </Avatar>
+      ),
+      onClick: () => {
+        resolve(f)
+        setOpen(false)
+      }
+    }))
+
+  if (filteredFlows.length > 0) {
+    filteredItems.push({
+      key: 'workflows',
+      label: t('workflow.title', 'Workflows'),
+      type: 'group',
+      children: filteredFlows
+    } as MenuItem)
+  }
 
   if (pinnedFlows.length > 0 && searchText.length === 0) {
-    const pinnedItems = flowEngineProviders
-      .flatMap((f) =>
-        f.flows
-          .filter((fl) => fl.type === 'chatflow')
-          .filter((fl) => pinnedFlows.includes(fl.id))
-          .map((fl) => ({
-            key: fl.id + '_pinned',
-            flow: fl,
-            provider: f
-          }))
-      )
-      .map((fl) => ({
-        key: fl.flow.id + '_pinned',
-        label: (
-          <Item>
-            <NameRow>
-              <span>
-                {fl.flow?.name} | {fl.provider.isSystem ? t(`provider.${fl.provider.id}`) : fl.provider.name}
-              </span>
-            </NameRow>
-            <PinIcon
-              onClick={(e) => {
-                e.stopPropagation()
-                togglePinFlow(fl.flow.id)
-              }}
-              isPinned={true}>
-              <PushpinOutlined />
-            </PinIcon>
-          </Item>
-        ),
-        icon: (
-          <Avatar src={getFlowEngineProviderLogo(fl.provider.id)} size={24}>
-            {first(fl.flow?.name)}
-          </Avatar>
-        ),
-        onClick: () => {
-          resolve(fl.flow)
-          setOpen(false)
-        }
-      }))
+    const pinnedItems = chatflows.map((fl) => ({
+      key: fl.id + '_pinned',
+      label: (
+        <Item>
+          <NameRow>
+            <span>{fl.name} | 'dify'</span>
+          </NameRow>
+          <PinIcon
+            onClick={(e) => {
+              e.stopPropagation()
+              togglePinFlow(fl.id)
+            }}
+            isPinned={true}>
+            <PushpinOutlined />
+          </PinIcon>
+        </Item>
+      ),
+      icon: (
+        <Avatar src={getFlowEngineProviderLogo('dify')} size={24}>
+          {first(fl.name)}
+        </Avatar>
+      ),
+      onClick: () => {
+        resolve(fl)
+        setOpen(false)
+      }
+    }))
     if (pinnedItems.length > 0) {
       filteredItems.unshift({
         key: 'pinned-workflows',

@@ -1,5 +1,4 @@
 import { useAssistant } from '@renderer/hooks/useAssistant'
-import { useFlowEngineProvider } from '@renderer/hooks/useFlowEngineProvider'
 import i18n from '@renderer/i18n'
 import { uploadFile } from '@renderer/services/FlowEngineService'
 import store, { useAppDispatch } from '@renderer/store'
@@ -20,7 +19,6 @@ interface Props {
 
 const WorkflowForm: FC<Props> = ({ block, message }) => {
   const [form] = Form.useForm()
-  const { flowEngineProvider } = useFlowEngineProvider(block.flow.providerId)
   const { assistant } = useAssistant(message.assistantId)
 
   const dispatch = useAppDispatch()
@@ -52,7 +50,6 @@ const WorkflowForm: FC<Props> = ({ block, message }) => {
             allowed_file_types={item.allowed_file_types}
             uploadFile={uploadFile}
             workflow={block.flow}
-            provider={flowEngineProvider}
           />
         )
       case 'file-list':
@@ -64,7 +61,6 @@ const WorkflowForm: FC<Props> = ({ block, message }) => {
             allowed_file_types={item.allowed_file_types}
             uploadFile={uploadFile}
             workflow={block.flow}
-            provider={flowEngineProvider}
           />
         )
 

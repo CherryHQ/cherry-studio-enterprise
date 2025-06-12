@@ -1,20 +1,13 @@
-import { createDifyApiInstance, DifyApi, IFile, IUploadFileResponse, IUserInputForm } from '@dify-chat/api'
+import { createDifyApiInstance, DifyApi, IFile, IUploadFileResponse } from '@dify-chat/api'
 import { getFileTypeByName } from '@renderer/components/Dify/FileUpload'
 import { Chunk, ChunkType } from '@renderer/types/chunk'
-import { EventEnum, Flow, FlowEngine } from '@renderer/types/flow'
+import { EventEnum, Flow } from '@renderer/types/flow'
 import { FileMessageBlock, ImageMessageBlock, Message } from '@renderer/types/newMessage'
 import { addAbortController, removeAbortController } from '@renderer/utils/abortController'
 import { findFileBlocks, findImageBlocks, getMainTextContent } from '@renderer/utils/messageUtils/find'
 import XStream from '@renderer/utils/xstream'
-import { v4 as uuidv4 } from 'uuid'
 
-import BaseFlowEngineProvider from './BaseFlowEngineProvider'
-
-export default class DifyFlowEngineProvider extends BaseFlowEngineProvider {
-  constructor(provider: FlowEngine) {
-    super(provider)
-  }
-
+export default class DifyProvider {
   private async getFiles(flow: Flow, message: Message): Promise<IFile[]> {
     const fileBlocks = findFileBlocks(message)
     const imageBlocks = findImageBlocks(message)
@@ -79,39 +72,39 @@ export default class DifyFlowEngineProvider extends BaseFlowEngineProvider {
     }
   }
 
-  public async check(flow: Flow): Promise<{ valid: boolean; error: Error | null }> {
-    try {
-      const difyApi = createDifyApiInstance({
-        user: uuidv4(),
-        apiKey: flow.apiKey,
-        apiBase: flow.apiHost
-      })
+  // public async check(flow: Flow): Promise<{ valid: boolean; error: Error | null }> {
+  //   try {
+  //     const difyApi = createDifyApiInstance({
+  //       user: uuidv4(),
+  //       apiKey: flow.apiKey,
+  //       apiBase: flow.apiHost
+  //     })
 
-      const response = await difyApi.getAppInfo()
+  //     const response = await difyApi.getAppInfo()
 
-      return { valid: response.name !== undefined, error: null }
-    } catch (error) {
-      console.error('检查工作流失败', error)
-      return { valid: false, error: new Error('检查工作流失败') }
-    }
-  }
+  //     return { valid: response.name !== undefined, error: null }
+  //   } catch (error) {
+  //     console.error('检查工作流失败', error)
+  //     return { valid: false, error: new Error('检查工作流失败') }
+  //   }
+  // }
 
-  public async getAppParameters(flow: Flow): Promise<IUserInputForm[]> {
-    try {
-      const difyApi = createDifyApiInstance({
-        user: uuidv4(),
-        apiKey: flow.apiKey,
-        apiBase: flow.apiHost
-      })
+  // public async getAppParameters(flow: Flow): Promise<IUserInputForm[]> {
+  //   try {
+  //     const difyApi = createDifyApiInstance({
+  //       user: uuidv4(),
+  //       apiKey: flow.apiKey,
+  //       apiBase: flow.apiHost
+  //     })
 
-      const parameters = await difyApi.getAppParameters()
+  //     const parameters = await difyApi.getAppParameters()
 
-      return parameters.user_input_form
-    } catch (error) {
-      console.error('获取工作流参数失败', error)
-      throw new Error('获取工作流参数失败')
-    }
-  }
+  //     return parameters.user_input_form
+  //   } catch (error) {
+  //     console.error('获取工作流参数失败', error)
+  //     throw new Error('获取工作流参数失败')
+  //   }
+  // }
 
   public async uploadFile(flow: Flow, file: File, userId: string): Promise<IUploadFileResponse> {
     try {

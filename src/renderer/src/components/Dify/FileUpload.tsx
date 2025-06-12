@@ -1,7 +1,7 @@
 import { UploadOutlined } from '@ant-design/icons'
 import { IFileType, IGetAppParametersResponse, IUploadFileResponse } from '@dify-chat/api'
 import i18n from '@renderer/i18n'
-import { Flow, FlowEngine } from '@renderer/types/flow'
+import { Flow } from '@renderer/types/flow'
 import { getFileExtension } from '@renderer/utils'
 import { Button, message, Upload } from 'antd'
 import { RcFile, UploadFile } from 'antd/es/upload'
@@ -56,9 +56,8 @@ export interface IUploadFileItem extends UploadFile {
 interface IFileUploadCommonProps {
   userId: string
   workflow: Flow
-  provider: FlowEngine
   allowed_file_types?: IGetAppParametersResponse['file_upload']['allowed_file_types']
-  uploadFile: (provider: FlowEngine, workflow: Flow, file: File, userId: string) => Promise<IUploadFileResponse>
+  uploadFile: (workflow: Flow, file: File, userId: string) => Promise<IUploadFileResponse>
   disabled?: boolean
   maxCount?: number
 }
@@ -78,17 +77,7 @@ interface IFileUploadMultipleProps extends IFileUploadCommonProps {
 type IFileUploadProps = IFileUploadSingleProps | IFileUploadMultipleProps
 
 export default function FileUpload(props: IFileUploadProps) {
-  const {
-    mode = 'multiple',
-    maxCount,
-    disabled,
-    allowed_file_types,
-    uploadFile,
-    workflow,
-    provider,
-    value,
-    onChange
-  } = props
+  const { mode = 'multiple', maxCount, disabled, allowed_file_types, uploadFile, workflow, value, onChange } = props
 
   const [files, setFiles] = useState<IUploadFileItem[]>([])
 
@@ -157,7 +146,7 @@ export default function FileUpload(props: IFileUploadProps) {
     }
 
     try {
-      const result = await uploadFile(provider, workflow, file, props.userId)
+      const result = await uploadFile(workflow, file, props.userId)
       const uploadedFile: IUploadFileItem = {
         ...fileBaseInfo,
         upload_file_id: result.id,

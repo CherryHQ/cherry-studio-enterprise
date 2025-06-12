@@ -1,6 +1,7 @@
 import api, { updateApiBasePath, updateApiToken } from '@renderer/config/api'
 import store from '@renderer/store'
 import { updateAssistant } from '@renderer/store/assistants'
+import { setFlows } from '@renderer/store/flow'
 import { setDefaultModel, setTopicNamingModel, setTranslateModel, updateProvider } from '@renderer/store/llm'
 import { setMCPServers } from '@renderer/store/mcp'
 import { MCPServer, Model, Provider } from '@renderer/types'
@@ -30,6 +31,8 @@ export async function syncConfig({ syncMcpServers = false }: { syncMcpServers?: 
     defaultTranslationModel: serverDefaultTranslationModel,
     mcpServers
   } = configurations
+
+  const serverWorkflows = (configurations as any).workflows
 
   if (!configurations.apiKey) {
     throw new Error('请联系管理员配置 API 密钥')
@@ -82,6 +85,10 @@ export async function syncConfig({ syncMcpServers = false }: { syncMcpServers?: 
     if (!isEmpty(mcpServers)) {
       dispatch(setMCPServers(mcpServers as MCPServer[]))
     }
+  }
+
+  if (!isEmpty(serverWorkflows)) {
+    dispatch(setFlows(serverWorkflows))
   }
 }
 

@@ -1,70 +1,20 @@
-import { createSelector } from '@reduxjs/toolkit'
-import { useAppDispatch, useAppSelector } from '@renderer/store'
-import {
-  addFlow,
-  addFlowEngineProvider,
-  removeFlow,
-  removeFlowEngineProvider,
-  updateFlow,
-  updateFlowEngineProvider,
-  updateFlowEngineProviders
-} from '@renderer/store/flow'
-import { Flow, FlowEngine, Workflow } from '@renderer/types/flow'
-
-const selectEnabledFlowEngineProviders = createSelector(
-  (state) => state.flow.providers,
-  (providers) => providers
-)
-
-export function useFlowEngineProviders() {
-  const flowEngineProviders: FlowEngine[] = useAppSelector(selectEnabledFlowEngineProviders)
-  const dispatch = useAppDispatch()
-
-  return {
-    flowEngineProviders: flowEngineProviders || [],
-    addflowEngineProvider: (provider: FlowEngine) => dispatch(addFlowEngineProvider(provider)),
-    removeflowEngineProvider: (provider: FlowEngine) => dispatch(removeFlowEngineProvider(provider)),
-    updateflowEngineProviders: (providers: FlowEngine[]) => dispatch(updateFlowEngineProviders(providers))
-  }
-}
-
-export function useAllFlowEngineProviders() {
-  return useAppSelector((state) => state.flow.providers)
-}
-
-export function useFlowEngineProvider(id: string) {
-  const flowEngineProvider = useAppSelector((state) => state.flow.providers.find((p) => p.id === id) as FlowEngine)
-  const flows = flowEngineProvider.flows
-  const dispatch = useAppDispatch()
-
-  return {
-    flowEngineProvider,
-    flows,
-    updateFlowEngineProvider: (provider: FlowEngine) => dispatch(updateFlowEngineProvider(provider)),
-    addFlow: (flow: Flow) => dispatch(addFlow(flow)),
-    updateFlow: (flow: Flow) => dispatch(updateFlow(flow)),
-    removeFlow: (flow: Flow) => dispatch(removeFlow(flow))
-  }
-}
+import { Workflow as IWorkflow, WorkflowTypeEnum } from '@cherrystudio/api-sdk'
+import { RootState } from '@renderer/store'
+import { Chatflow, Workflow } from '@renderer/types/flow'
+import { useSelector } from 'react-redux'
 
 export function useWorkflows() {
-  const workflows: Workflow[] = useAppSelector(selectEnabledFlowEngineProviders)
-    .map((provider) => provider.flows)
-    .flat()
-    .filter((flow) => flow.type === 'workflow')
+  const workflows: IWorkflow[] = useSelector((state: RootState) => state.flow.flows).filter(
+    (flow) => flow.type === WorkflowTypeEnum.WORKFLOW
+  )
 
-  return {
-    workflows
-  }
+  return { workflows: workflows as Workflow[] }
 }
 
 export function useChatflows() {
-  const chatflows: Workflow[] = useAppSelector(selectEnabledFlowEngineProviders)
-    .map((provider) => provider.flows)
-    .flat()
-    .filter((flow) => flow.type === 'chat')
+  const chatflows: IWorkflow[] = useSelector((state: RootState) => state.flow.flows).filter(
+    (flow) => flow.type === WorkflowTypeEnum.CHATFLOW
+  )
 
-  return {
-    chatflows
-  }
+  return { chatflows: chatflows as Chatflow[] }
 }

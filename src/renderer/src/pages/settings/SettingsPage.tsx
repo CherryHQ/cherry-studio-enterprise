@@ -1,5 +1,4 @@
 import { Navbar, NavbarCenter } from '@renderer/components/app/Navbar'
-import ModelSettings from '@renderer/pages/settings/ModelSettings/ModelSettings'
 import {
   Command,
   GitCompare,
@@ -25,13 +24,11 @@ import DisplaySettings from './DisplaySettings/DisplaySettings'
 import GeneralSettings from './GeneralSettings'
 import MCPSettings from './MCPSettings'
 import { McpSettingsNavbar } from './MCPSettings/McpSettingsNavbar'
-import ProvidersList from './ProviderSettings'
 import QuickAssistantSettings from './QuickAssistantSettings'
 import QuickPhraseSettings from './QuickPhraseSettings'
 import SelectionAssistantSettings from './SelectionAssistantSettings/SelectionAssistantSettings'
 import ShortcutSettings from './ShortcutSettings'
 import WebSearchSettings from './WebSearchSettings'
-import WorkflowProviderList from './WorkflowSettings'
 
 const SettingsPage: FC = () => {
   const { pathname } = useLocation()
@@ -130,7 +127,6 @@ const SettingsPage: FC = () => {
           <Routes>
             {/* <Route path="provider" element={<ProvidersList />} />
             <Route path="model" element={<ModelSettings />} /> */}
-            <Route path="workflow" element={<WorkflowProviderList />} />
             <Route path="web-search" element={<WebSearchSettings />} />
             <Route path="mcp/*" element={<MCPSettings />} />
             <Route path="general" element={<GeneralSettings />} />
